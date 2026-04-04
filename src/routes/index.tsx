@@ -14,7 +14,7 @@ function Home() {
           Stream Friends
         </h1>
         <p className="mt-6 text-lg leading-8 text-gray-400">
-          Organisez votre communaut&eacute;, jouez avec vos viewers
+          Organisez votre communauté, jouez avec vos viewers
         </p>
 
         <div className="mt-10">

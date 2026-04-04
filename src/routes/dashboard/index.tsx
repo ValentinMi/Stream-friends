@@ -20,14 +20,14 @@ function Dashboard() {
             Bienvenue, {user!.displayName}
           </h1>
           <p className="mt-1 text-gray-400">
-            G&eacute;rez vos sessions de jeu et votre communaut&eacute;
+            Gérez vos sessions de jeu et votre communauté
           </p>
         </div>
         <button
           type="button"
           className="rounded-lg bg-purple-600 px-5 py-2.5 text-sm font-semibold text-white shadow hover:bg-purple-700 transition-colors"
         >
-          Cr&eacute;er une session
+          Créer une session
         </button>
       </div>
 
@@ -45,7 +45,7 @@ function Dashboard() {
         {/* Community Stats Section */}
         <div className="rounded-xl border border-gray-800 bg-gray-900 p-6">
           <h2 className="mb-4 text-xl font-semibold text-white">
-            Stats communaut&eacute;
+            Stats communauté
           </h2>
           <div className="flex h-40 items-center justify-center rounded-lg border border-dashed border-gray-700">
             <p className="text-gray-500">Aucune statistique disponible</p>

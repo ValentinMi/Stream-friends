@@ -5,6 +5,8 @@ interface Session {
   expiresAt: Date
 }
 
+// TODO: Replace in-memory session store with database table or Redis before production.
+// Sessions are lost on server restart with the current implementation.
 const sessions = new Map<string, Session>()
 
 const THIRTY_DAYS = 30 * 24 * 60 * 60
@@ -35,7 +37,7 @@ export function invalidateSession(sessionId: string): void {
 export function setSessionCookie(sessionId: string): void {
   setCookie('session', sessionId, {
     httpOnly: true,
-    secure: true,
+    secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     path: '/',
     maxAge: THIRTY_DAYS,
@@ -51,7 +53,7 @@ export function getSessionFromCookie(): { userId: string } | null {
 export function clearSessionCookie(): void {
   setCookie('session', '', {
     httpOnly: true,
-    secure: true,
+    secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     path: '/',
     maxAge: 0,

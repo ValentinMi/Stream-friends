@@ -1,10 +1,19 @@
 import { createAPIFileRoute } from '@tanstack/react-start/api'
 import { getCookie } from 'vinxi/http'
 import { eq } from 'drizzle-orm'
+import { z } from 'zod'
 import { twitch } from '~/server/auth'
 import { createSession, setSessionCookie } from '~/server/auth'
 import { db } from '~/server/db'
 import { users } from '~/server/db/schema'
+
+const twitchUserSchema = z.object({
+  data: z.array(z.object({
+    id: z.string(),
+    display_name: z.string(),
+    profile_image_url: z.string(),
+  }))
+})
 
 export const APIRoute = createAPIFileRoute('/api/auth/twitch/callback')({
   GET: async ({ request }) => {
@@ -27,14 +36,21 @@ export const APIRoute = createAPIFileRoute('/api/auth/twitch/callback')({
       },
     })
 
-    const twitchData = (await twitchRes.json()) as {
-      data: Array<{
-        id: string
-        display_name: string
-        profile_image_url: string
-      }>
+    if (!twitchRes.ok) {
+      return new Response('Failed to fetch Twitch user', { status: 502 })
     }
+
+    let twitchData: z.infer<typeof twitchUserSchema>
+    try {
+      twitchData = twitchUserSchema.parse(await twitchRes.json())
+    } catch {
+      return new Response('Failed to fetch Twitch user', { status: 502 })
+    }
+
     const twitchUser = twitchData.data[0]
+    if (!twitchUser) {
+      return new Response('No user data from Twitch', { status: 502 })
+    }
 
     const [user] = await db
       .insert(users)

@@ -9,7 +9,7 @@ export const APIRoute = createAPIFileRoute('/api/auth/twitch')({
 
     setCookie('oauth_state', state, {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       path: '/',
       maxAge: 600,

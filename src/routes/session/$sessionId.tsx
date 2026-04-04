@@ -35,7 +35,7 @@ function SessionPage() {
         <div className="text-center">
           <h1 className="text-4xl font-bold text-white">Session introuvable</h1>
           <p className="mt-4 text-gray-400">
-            Cette session n'existe pas ou a &eacute;t&eacute; supprim&eacute;e.
+            Cette session n'existe pas ou a été supprimée.
           </p>
         </div>
       </div>
