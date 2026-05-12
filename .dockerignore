@@ -1,0 +1,12 @@
+node_modules
+.output
+.vinxi
+dist
+.git
+.env
+.env.local
+.env.*.local
+*.log
+.DS_Store
+drizzle/meta
+app.config.timestamp_*.js
