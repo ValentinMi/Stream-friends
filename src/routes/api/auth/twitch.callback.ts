@@ -1,5 +1,5 @@
 import { createAPIFileRoute } from '@tanstack/react-start/api'
-import { getCookie } from 'vinxi/http'
+import { getCookie } from '@tanstack/react-start/server'
 import { eq } from 'drizzle-orm'
 import { z } from 'zod'
 import { twitch } from '~/server/auth'
@@ -68,7 +68,7 @@ export const APIRoute = createAPIFileRoute('/api/auth/twitch/callback')({
       })
       .returning()
 
-    const sessionId = createSession(user.id)
+    const sessionId = await createSession(user.id)
     setSessionCookie(sessionId)
 
     return new Response(null, {

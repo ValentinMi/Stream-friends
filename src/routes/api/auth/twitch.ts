@@ -1,5 +1,5 @@
 import { createAPIFileRoute } from '@tanstack/react-start/api'
-import { setCookie } from 'vinxi/http'
+import { setCookie } from '@tanstack/react-start/server'
 import { twitch } from '~/server/auth'
 
 export const APIRoute = createAPIFileRoute('/api/auth/twitch')({

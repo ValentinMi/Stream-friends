@@ -1,15 +1,15 @@
 import { createAPIFileRoute } from '@tanstack/react-start/api'
-import { getCookie } from 'vinxi/http'
+import { getCookie } from '@tanstack/react-start/server'
 import {
   invalidateSession,
   clearSessionCookie,
 } from '~/server/auth'
 
 export const APIRoute = createAPIFileRoute('/api/auth/logout')({
-  GET: async () => {
+  POST: async () => {
     const sessionId = getCookie('session')
     if (sessionId) {
-      invalidateSession(sessionId)
+      await invalidateSession(sessionId)
     }
     clearSessionCookie()
 
