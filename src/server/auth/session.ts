@@ -1,37 +1,45 @@
-import { getCookie, setCookie } from 'vinxi/http'
-
-interface Session {
-  userId: string
-  expiresAt: Date
-}
-
-// TODO: Replace in-memory session store with database table or Redis before production.
-// Sessions are lost on server restart with the current implementation.
-const sessions = new Map<string, Session>()
+import { getCookie, setCookie } from '@tanstack/react-start/server'
+import { db } from '~/server/db'
+import { sessions } from '~/server/db/schema'
+import { eq, lt } from 'drizzle-orm'
 
 const THIRTY_DAYS = 30 * 24 * 60 * 60
 
-export function createSession(userId: string): string {
+export async function createSession(userId: string): Promise<string> {
   const sessionId = crypto.randomUUID()
   const expiresAt = new Date(Date.now() + THIRTY_DAYS * 1000)
-  sessions.set(sessionId, { userId, expiresAt })
+
+  await db.insert(sessions).values({
+    id: sessionId,
+    userId,
+    expiresAt,
+  })
+
   return sessionId
 }
 
-export function validateSession(
-  sessionId: string
-): { userId: string } | null {
-  const session = sessions.get(sessionId)
+export async function validateSession(
+  sessionId: string,
+): Promise<{ userId: string } | null> {
+  const result = await db
+    .select({ userId: sessions.userId, expiresAt: sessions.expiresAt })
+    .from(sessions)
+    .where(eq(sessions.id, sessionId))
+    .limit(1)
+
+  const session = result[0]
   if (!session) return null
+
   if (session.expiresAt < new Date()) {
-    sessions.delete(sessionId)
+    await db.delete(sessions).where(eq(sessions.id, sessionId))
     return null
   }
+
   return { userId: session.userId }
 }
 
-export function invalidateSession(sessionId: string): void {
-  sessions.delete(sessionId)
+export async function invalidateSession(sessionId: string): Promise<void> {
+  await db.delete(sessions).where(eq(sessions.id, sessionId))
 }
 
 export function setSessionCookie(sessionId: string): void {
@@ -44,7 +52,7 @@ export function setSessionCookie(sessionId: string): void {
   })
 }
 
-export function getSessionFromCookie(): { userId: string } | null {
+export async function getSessionFromCookie(): Promise<{ userId: string } | null> {
   const sessionId = getCookie('session')
   if (!sessionId) return null
   return validateSession(sessionId)

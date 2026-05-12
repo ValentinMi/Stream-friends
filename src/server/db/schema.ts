@@ -59,10 +59,26 @@ export const registrations = pgTable('registrations', {
   selectedAt: timestamp('selected_at'),
 })
 
+export const sessions = pgTable('sessions', {
+  id: text('id').primaryKey(),
+  userId: uuid('user_id')
+    .references(() => users.id)
+    .notNull(),
+  expiresAt: timestamp('expires_at').notNull(),
+})
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   gameSessions: many(gameSessions),
   registrations: many(registrations),
+  sessions: many(sessions),
+}))
+
+export const sessionsRelations = relations(sessions, ({ one }) => ({
+  user: one(users, {
+    fields: [sessions.userId],
+    references: [users.id],
+  }),
 }))
 
 export const gameSessionsRelations = relations(
