@@ -7,3 +7,4 @@ dist
 drizzle/meta
 *.tsbuildinfo
 .DS_Store
+app.config.timestamp_*.js

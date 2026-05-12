@@ -4,9 +4,9 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "vinxi dev",
-    "build": "vinxi build",
-    "start": "vinxi start",
+    "dev": "vite dev",
+    "build": "vite build",
+    "start": "node dist/server/server.js",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio"
@@ -28,8 +28,10 @@
   "devDependencies": {
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.1",
     "drizzle-kit": "^0.31.10",
-    "typescript": "^6.0.2"
+    "typescript": "^6.0.2",
+    "vite": "^8.0.3"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
