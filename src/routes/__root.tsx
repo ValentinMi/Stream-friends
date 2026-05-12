@@ -1,17 +1,18 @@
 import {
+  HeadContent,
   Link,
   Outlet,
+  Scripts,
   ScrollRestoration,
   createRootRouteWithContext,
   useRouteContext,
 } from '@tanstack/react-router'
-import { createServerFn, Meta, Scripts } from '@tanstack/react-start'
+import { createServerFn } from '@tanstack/react-start'
 import type { ReactNode } from 'react'
-import { getSessionFromCookie } from '~/server/auth/session'
-import { db } from '~/server/db'
-import { users } from '~/server/db/schema'
-import { eq } from 'drizzle-orm'
 import appCss from '~/styles/app.css?url'
+import { DefaultCatchBoundary } from '~/components/DefaultCatchBoundary'
+import { NotFound } from '~/components/NotFound'
+import { authMiddleware } from '~/server/middleware/auth'
 
 export type User = {
   id: string
@@ -24,23 +25,11 @@ export interface RootRouteContext {
   user: User
 }
 
-const getUser = createServerFn({ method: 'GET' }).handler(async () => {
-  const session = getSessionFromCookie()
-  if (!session) return null
-
-  const result = await db
-    .select({
-      id: users.id,
-      displayName: users.displayName,
-      avatar: users.avatar,
-      role: users.role,
-    })
-    .from(users)
-    .where(eq(users.id, session.userId))
-    .limit(1)
-
-  return result[0] ?? null
-})
+const getUser = createServerFn({ method: 'GET' })
+  .middleware([authMiddleware])
+  .handler(async ({ context }) => {
+    return context.user
+  })
 
 export const Route = createRootRouteWithContext<RootRouteContext>()({
   head: () => ({
@@ -55,6 +44,12 @@ export const Route = createRootRouteWithContext<RootRouteContext>()({
     const user = await getUser()
     return { user }
   },
+  errorComponent: (props) => (
+    <RootDocument>
+      <DefaultCatchBoundary {...props} />
+    </RootDocument>
+  ),
+  notFoundComponent: () => <NotFound />,
   component: RootComponent,
 })
 
@@ -86,12 +81,14 @@ function Navbar() {
                 >
                   Dashboard
                 </Link>
-                <a
-                  href="/api/auth/logout"
-                  className="rounded-md bg-gray-800 px-3 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
-                >
-                  Logout
-                </a>
+                <form action="/api/auth/logout" method="post">
+                  <button
+                    type="submit"
+                    className="rounded-md bg-gray-800 px-3 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
+                  >
+                    Logout
+                  </button>
+                </form>
               </>
             ) : (
               <Link
@@ -112,7 +109,7 @@ function RootDocument({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <head>
-        <Meta />
+        <HeadContent />
       </head>
       <body className="min-h-screen bg-gray-950 text-white">
         <Navbar />

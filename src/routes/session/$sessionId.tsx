@@ -1,11 +1,12 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
+import { z } from 'zod'
 import { db } from '~/server/db'
-import { gameSessions, registrations } from '~/server/db/schema'
+import { gameSessions } from '~/server/db/schema'
 import { eq } from 'drizzle-orm'
 
 const fetchSession = createServerFn({ method: 'GET' })
-  .validator((sessionId: string) => sessionId)
+  .inputValidator((data: unknown) => z.string().uuid().parse(data))
   .handler(async ({ data: sessionId }) => {
     const session = await db.query.gameSessions.findFirst({
       where: eq(gameSessions.id, sessionId),
@@ -23,6 +24,19 @@ const fetchSession = createServerFn({ method: 'GET' })
 
 export const Route = createFileRoute('/session/$sessionId')({
   loader: ({ params }) => fetchSession({ data: params.sessionId }),
+  pendingComponent: () => (
+    <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center">
+      <p className="text-gray-400 animate-pulse">Chargement de la session...</p>
+    </div>
+  ),
+  errorComponent: ({ error }) => (
+    <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4">
+      <div className="text-center">
+        <h1 className="text-4xl font-bold text-white">Erreur</h1>
+        <p className="mt-4 text-gray-400">{error.message}</p>
+      </div>
+    </div>
+  ),
   component: SessionPage,
 })
 
